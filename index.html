@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Исторические События</title>
+    </head>
+    <body>
+        <h1>Добавить событие</h1>
+
+        <input id="year" type="number" placeholder="год">
+        <input id="description" type="text" placeholder="описание">
+        <input id="country" type="text" placeholder="страна">
+        <button onclick="addEvent()">Добавить</button>
+
+        <p id="result"></p>
+
+        <h1>Удалить событие</h1>
+        <input id="deleteDescription" type="text" placeholder="Описание">
+        <button onclick="deleteEvent()">Удалить</button>
+
+        <p id="deleteResult"></p>
+
+        <h1>Изменить событие</h1>
+        <input id="oldDescription" type="text" placeholder="Старое описание">
+        <input id="newYear" type="number" placeholder="Новая дата">
+        <input id="newDescription" type="text" placeholder="Новое описание">
+        <input id="newCountry" type="text" placeholder="Новая страна">
+        <button onclick="updateEvent()">Изменить</button>
+
+        <p id="updateResult"></p>
+
+        <script>
+            function addEvent() {
+                const year = parseInt(document.getElementById("year").value)
+                const description = document.getElementById("description").value
+                const country = document.getElementById("country").value
+
+                fetch("http://localhost:8080/events/add", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({year, description, country})
+                })
+                .then(r => r.text())
+                .then(data => {
+                    document.getElementById("result").innerText = data
+                })
+            }
+
+        
+
+            function updateEvent() {
+                const oldDescription = document.getElementById("oldDescription").value
+                const year = parseInt(document.getElementById("newYear").value)
+                const description = document.getElementById("newDescription").value
+                const country = document.getElementById("newCountry").value
+
+                fetch("http://localhost:8080/events/update", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json" },
+                    body: JSON.stringify({oldDescription, year, description, country}) 
+
+                })
+                .then(r => r.text())
+                .then(data => {
+                    document.getElementById("updateResult").innerText = data
+                })
+            }
+
+            function deleteEvent() {
+                const description = document.getElementById("deleteDescription").value
+
+                fetch("http://localhost:8080/events/delete", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({year: 0, description, country: ""})
+                })
+                .then(r => r.text())
+                .then(data => {
+                    document.getElementById("deleteResult").innerText = data
+                })
+
+            }
+            
+        </script>
+
+
+    </body>
+</html>
