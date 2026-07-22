@@ -65,11 +65,6 @@ func main() {
 		return
 	}
 
-	files, _ := os.ReadDir(".")
-	for _, f := range files {
-		fmt.Println("Найден файл:", f.Name())
-	}
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.html")
 	})
