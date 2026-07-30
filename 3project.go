@@ -69,7 +69,7 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 
-	http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/events", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		country := r.URL.Query().Get("country")
 
 		var result []Event
@@ -81,7 +81,7 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(result)
-	})
+	}))
 
 	http.HandleFunc("/events/add", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		var newEvent Event
@@ -202,6 +202,9 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-
-	http.ListenAndServe(":"+port, nil)
+	fmt.Println("Сервер запускается на порту:", port)
+	err = http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		fmt.Println("Не удалось запустить сервер:", err)
+	}
 }

@@ -4,6 +4,12 @@
         <title>Исторические События</title>
     </head>
     <body>
+        <h1>Все события</h1>
+        <div id="allEvents"></div>
+        <button onclick="showAllEvents()">Показать все события</button>
+    
+
+
         <h1>Добавить событие</h1>
 
         <input id="year" type="number" placeholder="год">
@@ -28,7 +34,21 @@
 
         <p id="updateResult"></p>
 
-        <script>
+        <script>    
+
+            function showAllEvents() {
+                    console.log("Функция вызвана!")
+                    fetch("http://localhost:8080/events")
+    .then(r => r.json())
+    .then(events => {
+        for (const event of events){
+            console.log(event.year, event.description, event.country)
+        }
+
+    
+
+    })
+}
             function addEvent() {
                 const year = parseInt(document.getElementById("year").value)
                 const description = document.getElementById("description").value
