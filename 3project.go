@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 type Event struct {
@@ -44,6 +45,23 @@ func filterByCountry(events []Event, country string) []Event {
 	return result
 }
 
+func filterByYear(events []Event, year int) []Event {
+	result := []Event{}
+	for _, event := range events {
+		if event.Year == year {
+			result = append(result, event)
+		}
+	}
+	return result
+}
+
+func loggerMiddleware(handler func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Method, r.URL.Path)
+		handler(w, r)
+	}
+}
+
 func enableCORS(handler func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -69,21 +87,26 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 
-	http.HandleFunc("/events", enableCORS(func(w http.ResponseWriter, r *http.Request) {
-		country := r.URL.Query().Get("country")
+	http.HandleFunc("/events", loggerMiddleware(enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		yearStr := r.URL.Query().Get("year")
 
 		var result []Event
-		if country == "" {
+		if yearStr == "" {
 			result = events
 		} else {
-			result = filterByCountry(events, country)
+			year, err := strconv.Atoi(yearStr)
+			if err != nil {
+				http.Error(w, "Неверный формат", 400)
+				return
+			}
+			result = filterByYear(events, year)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(result)
-	}))
+	})))
 
-	http.HandleFunc("/events/add", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/events/add", loggerMiddleware(enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		var newEvent Event
 		err := json.NewDecoder(r.Body).Decode(&newEvent)
 		if err != nil {
@@ -113,9 +136,9 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(newEvent)
-	}))
+	})))
 
-	http.HandleFunc("/events/update", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/events/update", loggerMiddleware(enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		var req UpdateRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
@@ -157,9 +180,9 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(events[foundIndex])
 
-	}))
+	})))
 
-	http.HandleFunc("/events/delete", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/events/delete", loggerMiddleware(enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		var eventToDelete Event
 		err := json.NewDecoder(r.Body).Decode(&eventToDelete)
 		if err != nil {
@@ -196,7 +219,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("Событие удалено")
 
-	}))
+	})))
 
 	port := os.Getenv("PORT")
 	if port == "" {

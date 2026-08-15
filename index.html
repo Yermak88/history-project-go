@@ -7,6 +7,13 @@
         <h1>Все события</h1>
         <div id="allEvents"></div>
         <button onclick="showAllEvents()">Показать все события</button>
+
+        <input id="filterEventsByYearInput" type="number" placeholder="Год">
+        <button onclick="eventsByYear()">Показать события по году</button>
+
+        <div id="allEventsByYear"></div>
+
+
     
 
 
@@ -41,14 +48,30 @@
                     fetch("http://localhost:8080/events")
     .then(r => r.json())
     .then(events => {
-        for (const event of events){
-            console.log(event.year, event.description, event.country)
-        }
 
-    
+    let html = ""
+        for (const event of events){
+            html = html + "<p>" + event.year + " " + event.description + " " + event.country + "</p>"
+        }
+        document.getElementById("allEvents").innerHTML = html
 
     })
 }
+
+
+        function eventsByYear() {
+            const year = parseInt(document.getElementById("filterEventsByYearInput").value)
+            fetch("http://localhost:8080/events?year=" + year)
+            .then(r => r.json())
+            .then(events => {
+                let html = ""
+                for (const event of events) {
+                    html = html + "<p>" + event.year + " " + event.description + " " + event.country + "</p>"
+                }
+                document.getElementById("allEventsByYear").innerHTML = html
+            })
+        } 
+
             function addEvent() {
                 const year = parseInt(document.getElementById("year").value)
                 const description = document.getElementById("description").value
