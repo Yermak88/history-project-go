@@ -13,6 +13,27 @@
 
         <div id="allEventsByYear"></div>
 
+        <div id="allEventsByYearRange"></div>
+        <input id="filterYearFromInput" type="number" placeholder="От">
+        <input id="filterYearToInput" type="number" placeholder="До">
+        <button onclick="eventsByYearRange()">Показать события в определенном промежутке лет</button>
+
+        <input id="filterEventsByCountryInput" type="text" placeholder="название страны">
+        <button onclick="eventsByCountry()">Показать события по стране</button>
+        <div id="eventsByCountryFilter"></div>
+
+        <input id="filterEventsBySearchInput" type="text" placeholder="поиск по ключевому слову">
+        <button onclick="eventsBySearch()">Показать события по ключевому слову</button>
+        <div id="eventsByDescriptionSearch"></div>
+
+        <h1>Викторина - укажи год события</h1>
+        <button onclick="startQuiz()">Начать викторину</button>
+        <div id="quizQuestion"></div>
+
+        <input id="quizYearInput" type="number" placeholder="Твой ответ (год)">
+        <button onclick="checkQuizAnswer()">Ответить</button>
+        <p id="quizResult"></p>
+        <p id="quizScore">Счёт: 0 из 0</p>
 
     
 
@@ -72,7 +93,81 @@
             })
         } 
 
-            function addEvent() {
+        function eventsByYearRange() {
+            const yearFrom = parseInt(document.getElementById("filterYearFromInput").value)
+            const yearTo = parseInt(document.getElementById("filterYearToInput").value)
+            fetch("http://localhost:8080/events?yearFrom=" + yearFrom + "&yearTo=" + yearTo)
+            .then(r => r.json())
+            .then(events => {
+                let html = ""
+                for (const event of events) {
+                    html = html + "<p>" + event.year + " " + event.description + " " + event.country + "</p>"
+                }
+                document.getElementById("allEventsByYearRange").innerHTML = html
+            })
+        } 
+
+        function eventsByCountry() {
+            const country = document.getElementById("filterEventsByCountryInput").value
+            fetch("http://localhost:8080/events?country=" + country)
+            .then(r => r.json())
+            .then(events => {
+                let html = ""
+                for (const event of events) {
+                    html = html + "<p>" + event.year + " " + event.description + " " + event.country + "</p>"
+                }
+                document.getElementById("eventsByCountryFilter").innerHTML = html
+            })
+        }
+
+        function eventsBySearch() {
+            const search = document.getElementById("filterEventsBySearchInput").value
+            fetch("http://localhost:8080/events?search=" + search)
+            .then(r => r.json())
+            .then(events => {
+                let html = ""
+                for (const event of events) {
+                    html = html + "<p>" + event.year + " " + event.description + " " + event.country + "</p>"
+                }
+                document.getElementById("eventsByDescriptionSearch").innerHTML = html
+            })
+        }
+
+        let correctYear = null
+        let correctAnswersCount = 0
+        let totalAnswersCount = 0
+
+        function startQuiz() {
+            fetch("http://localhost:8080/events")
+            .then(r => r.json())
+            .then(events => {
+                const randomIndex = Math.floor(Math.random() * events.length)
+                const randomEvent = events[randomIndex]
+
+                correctYear = randomEvent.year
+
+                document.getElementById("quizQuestion").innerHTML = 
+                "<p>" + randomEvent.description + "</p>"
+
+                    document.getElementById("quizResult").innerText = ""
+            }) 
+        }
+
+        function checkQuizAnswer() {
+            const userAnswer = parseInt(document.getElementById("quizYearInput").value)
+
+            totalAnswersCount = totalAnswersCount + 1
+
+            if (userAnswer === correctYear) {
+                correctAnswersCount = correctAnswersCount + 1
+                document.getElementById("quizResult").innerText = "Верно"
+            } else {
+                document.getElementById("quizResult").innerText = "Неверно. Правильный ответ - " + correctYear
+            }
+            document.getElementById("quizScore").innerText = "Счёт: " + correctAnswersCount + " из " + totalAnswersCount
+        }
+            
+        function addEvent() {
                 const year = parseInt(document.getElementById("year").value)
                 const description = document.getElementById("description").value
                 const country = document.getElementById("country").value
@@ -122,6 +217,7 @@
                 })
 
             }
+
             
         </script>
 

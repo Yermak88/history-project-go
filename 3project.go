@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Event struct {
@@ -45,10 +46,30 @@ func filterByCountry(events []Event, country string) []Event {
 	return result
 }
 
+func filterByDescription(events []Event, substring string) []Event {
+	result := []Event{}
+	for _, event := range events {
+		if strings.Contains(event.Description, substring) {
+			result = append(result, event)
+		}
+	}
+	return result
+}
+
 func filterByYear(events []Event, year int) []Event {
 	result := []Event{}
 	for _, event := range events {
 		if event.Year == year {
+			result = append(result, event)
+		}
+	}
+	return result
+}
+
+func filterByYearRange(events []Event, yearFrom int, yearTo int) []Event {
+	result := []Event{}
+	for _, event := range events {
+		if event.Year >= yearFrom && event.Year <= yearTo {
 			result = append(result, event)
 		}
 	}
@@ -88,11 +109,46 @@ func main() {
 	})
 
 	http.HandleFunc("/events", loggerMiddleware(enableCORS(func(w http.ResponseWriter, r *http.Request) {
+
 		yearStr := r.URL.Query().Get("year")
 
 		var result []Event
+
 		if yearStr == "" {
-			result = events
+
+			yearFromStr := r.URL.Query().Get("yearFrom")
+			yearToStr := r.URL.Query().Get("yearTo")
+
+			if yearFromStr == "" || yearToStr == "" {
+				countryStr := r.URL.Query().Get("country")
+
+				if countryStr == "" {
+					searchStr := r.URL.Query().Get("search")
+
+					if searchStr == "" {
+						result = events
+					} else {
+						result = filterByDescription(events, searchStr)
+					}
+				} else {
+					result = filterByCountry(events, countryStr)
+				}
+
+			} else {
+				yearFrom, err := strconv.Atoi(yearFromStr)
+				if err != nil {
+					http.Error(w, "Неверный формат", 400)
+					return
+				}
+				yearTo, err := strconv.Atoi(yearToStr)
+				if err != nil {
+					http.Error(w, "Неверный формат", 400)
+					return
+
+				}
+				result = filterByYearRange(events, yearFrom, yearTo)
+			}
+
 		} else {
 			year, err := strconv.Atoi(yearStr)
 			if err != nil {
