@@ -71,7 +71,7 @@
 
             function showAllEvents() {
                     console.log("Функция вызвана")
-                    fetch("http://localhost:8080/events")
+                    fetch("/events")
     .then(r => r.json())
     .then(events => {
 
@@ -98,7 +98,7 @@
 
         function eventsByYear() {
             const year = parseInt(document.getElementById("filterEventsByYearInput").value)
-            fetch("http://localhost:8080/events?year=" + year)
+            fetch("/events?year=" + year)
             .then(r => r.json())
             .then(events => {
                 let html = ""
@@ -112,7 +112,7 @@
         function eventsByYearRange() {
             const yearFrom = parseInt(document.getElementById("filterYearFromInput").value)
             const yearTo = parseInt(document.getElementById("filterYearToInput").value)
-            fetch("http://localhost:8080/events?yearFrom=" + yearFrom + "&yearTo=" + yearTo)
+            fetch("/events?yearFrom=" + yearFrom + "&yearTo=" + yearTo)
             .then(r => r.json())
             .then(events => {
                 let html = ""
@@ -125,7 +125,7 @@
 
         function eventsByCountry() {
             const country = document.getElementById("filterEventsByCountryInput").value
-            fetch("http://localhost:8080/events?country=" + country)
+            fetch("/events?country=" + country)
             .then(r => r.json())
             .then(events => {
                 let html = ""
@@ -138,7 +138,7 @@
 
         function eventsBySearch() {
             const search = document.getElementById("filterEventsBySearchInput").value
-            fetch("http://localhost:8080/events?search=" + search)
+            fetch("/events?search=" + search)
             .then(r => r.json())
             .then(events => {
                 let html = ""
@@ -154,7 +154,7 @@
         let totalAnswersCount = 0
 
         function startQuiz() {
-            fetch("http://localhost:8080/events")
+            fetch("/events")
             .then(r => r.json())
             .then(events => {
                 const randomIndex = Math.floor(Math.random() * events.length)
@@ -188,7 +188,7 @@
                 const description = document.getElementById("description").value
                 const country = document.getElementById("country").value
 
-                fetch("http://localhost:8080/events/add", {
+                fetch("/events/add", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({year, description, country})
@@ -207,7 +207,7 @@
                 const description = document.getElementById("newDescription").value
                 const country = document.getElementById("newCountry").value
 
-                fetch("http://localhost:8080/events/update", {
+                fetch("/events/update", {
                     method: "POST",
                     headers: {"Content-Type": "application/json" },
                     body: JSON.stringify({oldDescription, year, description, country}) 
@@ -222,7 +222,7 @@
             function deleteEvent() {
                 const description = document.getElementById("deleteDescription").value
 
-                fetch("http://localhost:8080/events/delete", {
+                fetch("/events/delete", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({year: 0, description, country: ""})
